@@ -34,8 +34,17 @@ When you are using NIL you can either import the libraries the same way Lua does
 ~~~C
 #use LinkedList
 ~~~
-
-
+And using the library can be done in NIL like this:
+~~~Pascal
+var MyList
+MyList = LinkedList.NEW()
+MyList.AddLast("Hello")
+MyList.AddLast("World")
+for s in MyList.Each 
+    print(s)
+end
+~~~
+The effect should be the same. ;)
 
 Please note NIL only loads, translates and compiles its libraries ONCE (per Lua state). Using them again with either NIL.Use or #use will only redefine the variable with the previously loaded library. This is a bit similar to 
 "require" in "Pure Lua".
