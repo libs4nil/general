@@ -27,355 +27,195 @@
 
 
 class TLink
-
      var Previous
-
      var Next
-
      readonly var List
-
      readonly var MyObject
-
      
-
      void UnLink()
-
         if self.Previous
-
            self.Previous.Next = self.Next
-
         end
-
         if self.Next
-
            self.Next = self.Previous
-
         end
-
         if self.List.First==self
-
            self.List.First=self.Next
-
         end
-
         if self.List.Last==self
-
            self.List.Last=self.Previous
-
         end
-
      end
-
-     
 
      void CONSTRUCTOR(parentlist,obj, P, N)
-
         assert(obj!=nil,"Link needs an object of any kind. 'nil' is not acceptable")
-
         assert(parentlist,"No parent")
-
         self.Previous = P
-
         self.Next = N
-
         self.List = parentlist
-
         self.MyObject = obj
-
      end
-
 end
 
 
 
 class TLinkedList
-
     static bool _debug = true
-
     private var First
-
     private var Last
-
     readonly string want="var"
-
-    
-
+   
     private static void chat(string cht)
-
         if TLinkedList._debug
-
           print(cht)
-
         end
-
     end
-
     
 
     get delegate Each
-
         var ret
-
         var current
-
         current=self.First
-
         ret = var ()
-
             if current==nil then
-
               return nil 
-
             end
-
             var retobj 
-
             retobj = current.MyObject
-
             current = current.Next
-
             return retobj,current
-
         end        
-
         return ret
-
     end
-
     
 
     get int Count
-
         int i = 0
-
         for o in self.Each
-
             i = i + 1
-
         end
-
         return i
-
     end
 
     
 
     get table Array
-
         table ret
-
         for o in self.Each
-
             ret[#ret+1]=o
-
         end
-
         return ret
-
     end
 
     
 
     void AddLast(obj)
-
          if self.want!='var'
-
             assert(type(obj)==self.want,"This list may only contain "..self.want)
-
          end
-
          TLink newLink
-
          newLink = TLink.NEW(self,obj,self.Last,nil)
-
          if self.Last
-
             self.Last.Next=newLink
-
          end
-
          self.First=self.First or newLink
-
          self.Last=newLink
-
     end
 
     
 
     void AddFirst(obj)
-
          if self.want!='var'
-
             assert(type(obj)==self.want,"This list may only contain "..self.want)
-
          end
-
          var newLink
-
          newLink = TLink.NEW(self,obj,nil,self.First)
-
          if self.First
-
             self.First.Previous = newLink
-
          end
-
          self.Last = self.Last or newLink
-
          self.First=newLink
-
     end
 
     
 
     set var OLast
-
         self.AddLast(value)
-
     end
 
     
 
     get var OLast
-
         if self.Last
-
            return self.Last.MyObject
-
         end
-
         return nil
-
     end
-
-    
 
     get var OFirst
-
         if self.First
-
            return self.First.MyObject
-
         end
-
         return nil
-
     end
-
-    
 
     set var OFirst
-
         self.AddFirst(value)
-
     end
 
-    
-
     var AtIndex(int indx)
-
         var ret 
-
         ret = self.First
-
         if not ret then 
-
            error("Empty List") 
-
         end
-
         while indx>0
-
            ret = ret.Next
-
            assert("List index out of bounds")
-
            indx = indx - 1
-
         end
-
         return ret.MyObject
-
     end
 
     
 
     void RemoveItem(item,times)       
-
        for o,l in self.Each
-
            if o==item
-
               l.Unlink()
-
               if times
-
                  times = times - 1
-
                  if times == 0
-
                     break
-
                  end
-
               end
-
            end
-
        end
-
     end
-
-    
 
     void RemoveItems(table items,times)
-
        table map
-
        for i,v in ipairs(items)
-
            map[v]=true
-
        end
-
        for o,l in self.Each
-
            if map[o]
-
               l.Unlink()
-
               if times
-
                  times = times - 1
-
                  if times == 0
-
                     break
-
                  end
-
               end
-
            end
-
        end
-
     end
-
-
-
-    
 
     void CONSTRUCTOR(want)
-
          self.want=want or "var"
-
     end
 
-    
-
 end    
-
 
 
 return TLinkedList
