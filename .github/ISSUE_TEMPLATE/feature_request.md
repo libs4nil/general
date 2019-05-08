@@ -10,6 +10,9 @@ assignees: Tricky1975
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
+**Which library is the feature for?**
+It would make it easier if I don't have to guess these things ;)
+
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.
 
