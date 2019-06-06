@@ -37,7 +37,7 @@ class TLink
            self.Previous.Next = self.Next
         end
         if self.Next
-           self.Next = self.Previous
+           self.Next.Previous = self.Previous
         end
         if self.List.First==self
            self.List.First=self.Next
@@ -61,8 +61,8 @@ end
 
 class TLinkedList
     static bool _debug = true
-    private var First
-    private var Last
+    var First
+    var Last
     readonly string want="var"
    
     private static void chat(string cht)
@@ -81,9 +81,11 @@ class TLinkedList
               return nil 
             end
             var retobj 
+            var retlink
+            retlink=current
             retobj = current.MyObject
             current = current.Next
-            return retobj,current
+            return retobj,retlink
         end        
         return ret
     end
@@ -201,7 +203,7 @@ class TLinkedList
        for o,l in self.Each
            if map[o]
               l.Unlink()
-              if times
+              if times then
                  times = times - 1
                  if times == 0
                     break
@@ -210,13 +212,31 @@ class TLinkedList
            end
        end
     end
+    
+    var ToArray()
+        table ret
+        for v in self.Each
+            ret[#ret+1]=v
+        end
+        return ret
+    end
+    
+    static var FromArray(table ar)
+		var ret
+		ret = TLinkedList.NEW()
+		for _,v in ipairs(ar)
+			ret.AddLast(v)
+		end
+		return ret
+    end
 
     void CONSTRUCTOR(want)
          self.want=want or "var"
     end
+        
 
-end    
+end
 
 
-return TLinkedList
+return TLinkedList.NEW
 
