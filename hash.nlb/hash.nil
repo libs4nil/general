@@ -1,0 +1,17 @@
+// For now only md5 support, I must study the full sha2 file before using it
+// But some issues and dependency calls make that I'll leave that be for now.
+
+module hash
+
+	static var _md5
+	
+	static string md5(string str2hash)
+		hash._md5 = hash._md5 or NIL.Use("md5.lua")
+		return _md5.sum(str2hash)
+	end
+	
+	void CONSTRUCTOR()
+		error("The 'hash' module is entirely static and should not be used with any NEW functions!")
+	end
+
+end
