@@ -1,0 +1,11 @@
+#use 'tables.nil'
+
+table a
+table b
+
+a = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"}
+b = shuffletable(a)
+
+for i=1,#a
+	print(i,a[i],b[i])
+end
