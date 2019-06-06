@@ -1,0 +1,342 @@
+// License Information:
+// gini.nlb/gini.nil
+// GINI is not INI
+// version: 19.06.06
+// Copyright (C)  Jeroen P. Broks
+// This software is provided 'as-is', without any express or implied
+// warranty.  In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 1. The origin of this software must not be misrepresented; you must not
+// claim that you wrote the original software. If you use this software
+// in a product, an acknowledgment in the product documentation would be
+// appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+// misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+// End License Information
+
+//--[[
+//  gini is not ini.lua
+//  
+//  version: 18.01.12
+//  Copyright (C) 2016, 2017, 2018 Jeroen P. Broks
+//  This software is provided 'as-is', without any express or implied
+//  warranty.  In no event will the authors be held liable for any damages
+ // arising from the use of this software.
+ // Permission is granted to anyone to use this software for any purpose,
+//  including commercial applications, and to alter it and redistribute it
+//  freely, subject to the following restrictions:
+//  1. The origin of this software must not be misrepresented; you must not
+//     claim that you wrote the original software. If you use this software
+//     in a product, an acknowledgment in the product documentation would be
+//     appreciated but is not required.
+//  2. Altered source versions must be plainly marked as such, and must not be
+//     misrepresented as being the original software.
+//  3. This notice may not be removed or altered from any source distribution.
+//]]
+
+//-----//
+
+//--[[
+
+//    This is a NIL Conversion of code originally written in BlitzMax
+    
+//]]    
+-- Strict
+--Import tricky_units.StringMap
+--Import tricky_units.advdatetime
+--Import tricky_units.Listfile
+
+-- $USE libs/stringmap
+-- $USE libs/Listfile 
+
+--Private
+--Type tf
+--  Field f(Ini:TIni,para$)
+--  End Type
+
+#localuse "libs/strings"
+#localuse "libs/tables"
+  
+table tfm //local tfm = {} -- :TMap = New TMap  
+string MapValueForKey(table tb,string key)
+	return tb[key]
+end
+
+void IniCall(name,ini,para)
+	var f
+	f = tf(MapValueForKey(tfm,name:upper()))
+	if not f then 
+		print("ERROR! Call: I could not retrieve function: "+name) 
+		return
+	end
+	f(ini,para)
+end 
+
+
+class GINI
+
+	table Vars
+	table Lists
+	
+	get var EachVar
+		table keys
+		table values
+		int i
+		for k,v in pairs(Vars)
+			keys[#keys+1] = k
+			values[k] = v
+		end
+		table.sort(keys)
+		return var()
+			i = i + 1
+			if i>#keys then return nil,nil end
+			return keys[i],values[keys[i]]
+		end
+		
+	string C(string T)
+		return self.Vars[T:upper()] or ""
+	end
+	
+	void D(string T,string V)
+		self.Vars[T:upper()] = V
+	end
+	
+	void Kill(string T)
+		self.Vars[T:upper()] = nil // Goodbye!
+	end
+
+	void CList (string T,OnlyIfNew)
+		if OnlyIfNew and self.Lists[T:upper()] then return end
+			self.Lists[T:upper()] = {}
+		end
+	end
+
+	table List(string T)
+		table ret
+		ret = self.Lists[T:upper()]
+		if not ret then print("WARNING! List "..T.." not found!") end
+		return ret
+	end  
+	
+	void Add(string T,string item)
+		if not self.Lists[T:upper()] then  self.CList(T) end
+		table r
+		r = self:List(T)
+		r[#r+1]=item
+	end 
+	
+	void DuplicateList(string Ori,string Target) 
+		self.Lists[Target:upper()]=self.Lists[Ori:Upper()] 
+	end
+
+end
+//function Ini_RegFunc(Name,Func) --Name$,Func(Ini:TIni,Para:String))
+//local f -- :tf = New tf
+//f = func
+//MapInsert( tfm,Name:upper(),f)
+/end -- End Function
+
+global var newGINI()
+//  local ret = {}
+  
+//  ret.Vars=NewStringMap() --:StringMap = New StringMap
+//  ret.Lists=NewTMap() --:TMap = New TMap
+//  assert(ret.Vars,"Internal error: Vars=nil")
+//  assert(ret.Lists,"Internal error: Lists=nil")
+
+//  for k,f in pairs(Ini_RegFuncs) do ret[k]=f end  
+  
+//  return ret 
+	return GINI.NEW()
+end  --End Type
+  
+  
+string AllowedChars = "qwertyuiopasdfghjklzxcvbnm[]{}1234567890-_+$!@%^&*()_+QWERTYUIOPASDFGHJKL|ZXCVBNM<>?/ '."
+
+string IniString(string A,XAllow)
+	table rat
+	ret = {[false]="",[true]=A}
+	allowed = true
+	for i=1 , #A do
+		var check1
+		var check2
+		check1,check2 = (allowedchars..(XAllow or "")).find(mid(a,i,1),1,true)
+		allowed = allowed and check1 //--allowed = allowed And (allowedchars+XAllow).find(Chr(A[i]))>=0
+		//--'If Not allowed Print "I will not allow: "+Chr(A[i])+"/"+A
+		ret[false] = ret[false] .. "#("..string.byte(mid(a,i,1))..")"
+	end
+	return ret[allowed] 
+end --End Function
+
+string UnIniString(string A)
+	string ret
+	ret=A
+	for i=0 , 255 do
+		ret = replace(ret,"#("..i..")",string.char(i))
+  end
+return ret  
+end --End Function
+
+bool ListContains(table tab,content)
+	for _,c in ipairs(tab)
+		if c==content
+			return true
+		end
+	end
+	return false
+end
+
+global string SaveGINI(string file,Ini,real)  
+	var BT 
+	var f
+	table Done //= {} --:TList = New TList
+	table L //={} --:TList = New TList
+	//var LN
+	var Dupe
+	//local K --$
+	string output="[rem]\nGenerated by a program written in NIL\n\n"
+	output = output .."[vars]\n"
+	for K,_ in ini.Vars do
+		output = output .. IniString(K).."="..IniString(Ini.C(K),",.").."\n"  
+	end
+	output = output .. "\n\n"
+	for k,LN in spairs(ini.Lists) do --For K$=EachIn(MapKeys(ini.lists))
+		LN=IniString(K)
+		if not ListContains(L,K) then
+		for K2,_ in spairs(ini.lists) do
+			if K~=K2 and (not ListContains(L,K2)) and ini.list(K)==ini.list(K2) then
+				LN=LN..","..IniString(K2)
+				L[#L+1]=K2
+			end
+		end 
+		output = output .."[List:"..LN.."]\n"
+		for V in each( ini.List(K) ) do
+			output = output .. IniString(V,",.:;\"") .."\n"
+		end 
+		output = output .."\n\n"  --WriteLine BT,""     
+		end
+	end
+	if file!="*" and file!="CON"
+		if real then
+			bt = io.open(file,"wb")
+			bt:write(output)
+			bt:close()
+		else
+			//love.filesystem.write(file,output)
+			error("No save device set up yet") // TODO!
+		end      
+	end
+end --End Function      
+
+var ParseIni(Data,AIni) --function LoadIni(File,AIni,nMerge,real)
+	var Ini
+	Ini = AIni
+	bool nMerge=false //-- Since Lua does not support the required functionality I had to do this!
+	if nMerge or (not Ini) then Ini=newTIni() end
+	//--Local wtag$,Lst:TList,line$,tag$,tagsplit$[],tagparam$[],tline$,cmd$,para$,pos
+	var wtag
+	var lst
+	string line
+	string tag
+	var tagsplit
+	var tagparam
+	var tline
+	var cmd
+	var para
+	var pos
+	tag="OLD"
+	var LData
+	switch type(Data)
+		case "string"
+			LData = split("\n")
+		case "table"
+			LData = Data
+		default
+			error("I do not know how to parse a "..type(Data))
+	end
+	for line in each (LData) do //--( Listfile(File) ) do
+		line = trim(line)
+		if line~="" then
+			if left(trim(line),1)=="[" and right(trim(line),1)=="]" then 
+				wTag = mid(trim(line),2,#(trim(line))-2)
+				tagsplit=split(wTag,":")
+				tag = tagsplit[1]:upper()
+				if upper(tagsplit[1])=="LIST" then
+					if #(Tagsplit[1])<2 then return print("ERROR! Incorrectly defined list!") end
+					lst = {}        
+					for K in each( tagsplit[2].split(",") ) do
+						//-- 'ini.clist(UnIniString(K))
+						Ini.Lists[upper(UnIniString(K)]=lst
+					end //--Next
+				//--'lst=ini.list(UnIniString(K)) 
+				end //-- EndIf
+		else
+			//--Select tag
+			if     tag=="REM" then
+			elseif tag=="OLD" then
+				print("[OLD] removed! It was deprecated in the first place!")
+			elseif tag=="SYS" or tag=="SYSTEM" then   
+				tline = trim(line)
+				pos,_ = tline:find(" ",1,true)
+				if pos<-1 then pos = #(tline) end
+				cmd  = upper(left(tline,pos))
+				para = mid(tline,pos+1,#tline-pos)
+				//--Select cmd
+				if cmd== "IMPORT" or cmd=="INCLUDE" then
+					error("Sorry! IMPORT and INCLUDE are not supported YET!)
+					pos,_ = para.find("/",1,true)<0
+					//-- *if windows
+					pos = pos and mid(para2,1)~=":"
+					pos = pos and para.find("\\",1,true)
+					//-- *fi
+					if pos then para=extractdir(file.."/"..para) end
+					//--[[?debug
+					//Print "Including: "+para
+					//?]]
+					//LoadIni ( para,ini,false,true )              
+				else
+					--Default
+					print ("System command "..cmd.." not understood: "..tline )
+				end --End Select   
+			elseif tag=="VARS" then
+				if not line:find("=",1,true) then 
+					print("Warning! Invalid var definition: "..line)
+				else
+					tagsplit=split(line,"=")
+					//--print(serialize("defining",tagsplit),UnIniString(tagsplit[1]),UnIniString(tagsplit[2]))
+					Ini.D(UnIniString(tagsplit[1]),UnIniString(tagsplit[2]))
+				end -- EndIf
+			elseif tag=="LIST" then
+				lst[#lst+1]=uninistring(line)
+			elseif "CALL" then
+				if not line:find(":",1,true) then
+					print("Call: Syntax error: "+line)
+				else
+					tagsplit=mysplit(line,":")
+					IniCall(tagsplit[1],ini,UnIniString(tagsplit[2]))
+				end //--  EndIf
+			else //--Default
+				Print( "ERROR! Unknown tag: "..tag)
+				return  
+			end //--End Select  
+		end //--EndIf
+	end //--EndIf   
+	end //--Next
+end --End Function
+
+//-------------------------------------------------------------------------
+//-- If LoadIni is too awkward for you to use, you can use this in stead --
+//-------------------------------------------------------------------------
+var ReadIni(Data)
+	var ret
+	ret = newTIni() //--{} --Local ret:TIni = New TIni
+	ParseIni(file,ret)
+	return ret
+end //--End Function  
+  
+return true
+
