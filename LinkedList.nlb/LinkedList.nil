@@ -40,11 +40,11 @@ class TLink
         if self.Next
            self.Next.Previous = self.Previous
         end
-        if self.List.First==self
-           self.List.First=self.Next
+        if self.List.First == self
+           self.List.First = self.Next
         end
-        if self.List.Last==self
-           self.List.Last=self.Previous
+        if self.List.Last == self
+           self.List.Last = self.Previous
         end
      end
 
@@ -57,8 +57,6 @@ class TLink
         self.MyObject = obj
      end
 end
-
-
 
 class TLinkedList
     static bool _debug = true
