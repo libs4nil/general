@@ -1,0 +1,66 @@
+#pure
+local
+#endpure
+
+class Stack
+	private table values
+	private string wantedtype
+	
+	void CONSTRUCTOR(mytype)
+		mytype = mytype or "var"
+		switch mytype
+			case "string" "var" "number" "table" "function" "boolean"
+				wantedtype = mytype
+			case "delegate"
+				wantedtype = "function"
+			case "int"
+				wantedtype = "number"
+			case "bool"
+				wantedtype = "bool"
+			case "nil"
+				error("'nil' is not allowed for stacking!")
+			default
+				error("Unknown type requested")
+		end
+	end
+	
+	get var Value
+		var ret
+		if #values<=0 then return nil end
+		ret = self.values[#values]
+		self.values[#values]=nil // popping = removing too!
+		return ret
+	end
+	
+	set var Value
+		assert(value and (self.wantedtype=="var" or type(value)==self.wantedtype),"Stack wants "..self.wantedtype.."; got "..type(value))
+		self.values[#values+1] = value
+	end
+	
+	void Push(v)
+		Value = v
+	end
+	
+	var Pop()
+		return Value
+	end
+	
+	get var PopEach
+		return var()
+			return Value
+		end
+	end
+	
+	get var NoPopEach
+		var i=#values + 1
+		return var()
+			i = i - 1
+			if i<=0 then return nil end
+			return values[i]
+		end
+	end
+end
+
+#pure
+return Stack
+#endpure
