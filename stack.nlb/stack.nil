@@ -10,13 +10,13 @@ class Stack
 		mytype = mytype or "var"
 		switch mytype
 			case "string" "var" "number" "table" "function" "boolean"
-				wantedtype = mytype
+				self.wantedtype = mytype
 			case "delegate"
-				wantedtype = "function"
+				self.wantedtype = "function"
 			case "int"
-				wantedtype = "number"
+				self.wantedtype = "number"
 			case "bool"
-				wantedtype = "bool"
+				self.wantedtype = "bool"
 			case "nil"
 				error("'nil' is not allowed for stacking!")
 			default
@@ -38,25 +38,26 @@ class Stack
 	end
 	
 	void Push(v)
-		Value = v
+		self.Value = v
 	end
 	
 	var Pop()
-		return Value
+		return self.Value
 	end
 	
 	get var PopEach
 		return var()
-			return Value
+			return self.Value
 		end
 	end
 	
 	get var NoPopEach
-		var i=#values + 1
+		int i
+		i=#self.values + 1
 		return var()
 			i = i - 1
 			if i<=0 then return nil end
-			return values[i]
+			return self.values[i]
 		end
 	end
 end
