@@ -1,7 +1,7 @@
 // License Information:
 // LinkedList.nlb/LinkedList.nil
 // Linked List support for NIL
-// version: 19.06.06
+// version: 19.07.16
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -17,6 +17,7 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
+
 
 
 // This is just an experimental Linked List library.
@@ -115,7 +116,7 @@ class TLinkedList
             assert(type(obj)==self.want,"This list may only contain "..self.want)
          end
          TLink newLink
-         newLink = TLink.NEW(self,obj,self.Last,nil)
+         newLink = new TLink(self,obj,self.Last,nil)
          if self.Last
             self.Last.Next=newLink
          end
@@ -130,7 +131,7 @@ class TLinkedList
             assert(type(obj)==self.want,"This list may only contain "..self.want)
          end
          var newLink
-         newLink = TLink.NEW(self,obj,nil,self.First)
+         newLink = new TLink(self,obj,nil,self.First)
          if self.First
             self.First.Previous = newLink
          end
@@ -222,7 +223,7 @@ class TLinkedList
     
     static var FromArray(table ar)
 		var ret
-		ret = TLinkedList.NEW()
+		ret = new TLinkedList()
 		for _,v in ipairs(ar)
 			ret.AddLast(v)
 		end
@@ -236,7 +237,8 @@ class TLinkedList
 
 end
 
-
-return TLinkedList.NEW
+#pure
+return TLinkedList
+#endpure
 
 
