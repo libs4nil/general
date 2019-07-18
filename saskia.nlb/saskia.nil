@@ -1,0 +1,247 @@
+// SASKIA = Serial Adventure Scripting Keeping Interface Advancements
+//
+// SASKIA is a pretty simple scripter set up in NIL, meant to avoid 
+// the woes of engines where callbacks are standard or even mandadory.
+//
+// Now SASKIA has been written in NIL, but it should be easy to 
+// translate the code to other scripting languages such as Lua (Duh, 
+// since that is what NIL already does), squirrel and JavaScript (the
+// latter in particular can be interesting.
+
+// The Syntax may remind you of assembler, but it's not nearly as fast
+// (On the contray actually, and therefore SASKIA should only be used
+// to fake a serial approach to a callback-only environment).
+// The syntax to ALL instructions is INSTRUNCTION Para1,para2,para3 etc.
+// Please note it was not set up to be "turing-complete", as that should
+// be taken up by the underlying programs.
+
+
+// This line is set up for Bubble engines. When used in alternate engines
+// you may need to alter the foldername a little bit.
+#use "libs/strings"
+#use "libs/stack"
+#use "libs/linkedlist"
+
+delegate compile
+var retval
+table instructions
+table instructionstrue
+table instructionsmeta
+
+compile = loadstring or load // Older versions of Lua use 'loadstring'. Newer versions use 'load'. I had to keep both possibilities in mind here!
+
+instructionsmeta.__newindex = void()
+	error("The instruction table is READ ONLY!")
+end
+
+instructionsmeta.__index(t,k)
+	return assert(instructionstrue[k],"Instruction "..k.." doesn't exist")
+end
+
+setmetatable(instructions,instructionsmeta)
+
+instructionstrue.CALL = void (session,params)
+	string f
+	string d
+	delegate ls
+	f = params[1]
+	d = "return "..f .. "("
+	for i,p in pairs(params) do
+		if i>1 then
+			if i>2 then d = d ..", "
+			d = d .. p
+		end
+	end
+	d = d .. ")"
+	ls = compile(p)
+	retval = ls()
+end
+
+
+instructionstrue.JMP = void (session,string label)
+	var script
+	script = session.script
+	assert(script.labels[label[1]],"Label '"..label[1].."' doesn't exist!")
+	seesion.curline = script.label[label[1]] - 1
+end
+
+instructionstrue.CHK = void (session,para)
+	delegate ls
+	ls = compile("return "..para[1])
+	if ls() 
+		instructionstrue.JMP(session,para[2])
+	end
+end
+
+instruction.MOV = void(session,para)
+	delegate ls
+	ls = compile(para[2] .. " = "..para[1])
+end
+
+instruction["END"] = void(session)
+	session.running=false
+end
+
+instruction.GROUP = void(session,para)
+	session.dontyield = tonumber(para[1] or 2)
+end
+
+instruction["RETURN"] = void(session)
+	session.curline = session.insstack.Value
+	if not session.curline
+		session.running=false
+	end
+end
+
+instruction.GOSUB = void(session,params)
+	session.insstack.Value = session.curline
+	instruction.JMP(session,params)
+end
+
+string DefaultLoadFunction(string filename)
+	var f
+	string content
+	f = assert(io.open(file, "rb"))
+	content = f:read("*all")
+	f:close()
+	return content
+end	
+
+
+
+
+
+#pure
+local
+#endpure
+class CL_SASINS
+	string command
+	table para
+	
+	void CONSTRUCTOR(cmd,para)
+		self.command=cmd
+		self.para = para
+	end
+end
+
+#pure
+local
+#endpure
+class CL_SESSION
+	int curline = 0
+	int dontyield = 0
+	bool running = false
+	var insstack
+	var script
+	
+	
+	
+	void CONSTRUCTOR(script,startlabel)
+		startlabel = startlabel or ""
+		assert(type(startlabel)=="string","String expected for startlabel")
+		self.script=script
+		if startlabel!=""
+			assert(script.labels[startlabel]),"Label "..startlabel.." not found! Cannot start session!")
+			self.curline = script.labels[startlabel])
+		end
+		self.insstack = new Stack
+		self.script = script
+	end
+end
+
+#pure
+local
+#endpure
+
+class CL_SASKIA
+	table instr
+	table labels
+	static var sessions
+	
+	static delegate LoadFunction
+	
+	static var LoadScript(file)
+		string script
+		script = (CL_SASKIA.LoadFunction or DefaultLoadFunction)(file)
+		return new CL_SASKIA(script)
+	end
+	
+	void Parse(script)
+		self.labels = {}
+		self.instr = {}
+		table lines
+		lines = brutesplit(script,'\n')
+		for i=1,#lines
+			lines[i] = Trim(lines[i])
+			if Left(lines[i],1)==";"
+				// Nothing at all here!
+			elseif Left(lines[i],1)==":"
+				self.labels[Right(lines[1],#lines[i]-1)] = #self.instr + 1
+			else
+				string cmd
+				table para
+				int parap = 1
+				int p=1
+				int haakjes = 0
+				bool reeks = false
+				while not (p==#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
+					p = p + 1
+				end
+				cmd = trim(Left(lines[i],p):upper()
+				while p<#lines[i]
+					switch Mid(lines[i],p,1)
+						case "\""
+							para[parap] = para[parap] .. "\""
+							reeks = not reeks
+						case "("
+							haakjes = haakjes + 1
+							para[parap] = para[parap] .. "("
+						case ")"
+							assert(haakjes>0,"unexpected ) in SASKIA script line #"..i)
+							haakjes = haakjes - 1
+							para[parap] = para[parap] .. ")"
+						case ","
+							parap = parap + 1
+							para [parap]=""
+						default
+							para[parap] = para[parap] .. Mid(lines[i],p,1)
+					end
+				end
+				assert(haakjes == 0 and (not reeks),"Unexpected end of line #"..i.." in SASKIA script")
+				self.instr[#self.instr+1] = new CL_SASINS(cmd,para)
+			end
+		end
+		
+		void CONSTRUCTOR(string script)
+			self.Parse(script)
+			self.sessions = self.sessions or new TLinkedList
+		end
+		
+		void Start(label)
+			var s
+			s = new CL_SESSION(self,label)
+			self.sessions.AddLast(s)
+		end
+		
+		static void Cycle()
+			for ses,lnk in self.sessions.Each
+				if (not ses.running) or ses.curline>#ses.script.instr
+					lnk.Unlink()
+				else
+					var ins
+					repeat
+						if ses.dontyield>0 then ses.dontyield = ses.dontyield - 1 end
+						ses.curline = ses.curline + 1
+						ins = ses.script.instr[ses.curline]
+						if ins
+							instructions[ins](ins.command,ins.para)
+						end
+					until ses.dontyield<=0
+				end
+			end
+		end
+end
+
+#pure
+return CL_SASKIA
+#end
