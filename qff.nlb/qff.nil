@@ -1,6 +1,6 @@
 // License Information:
-// hash.nlb/hash.nil
-// Hash
+// qff.nlb/gff.nil
+// Quick File Features
 // version: 19.07.25
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
@@ -18,21 +18,26 @@
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
 
-// For now only md5 support, I must study the full sha2 file before using it
-// But some issues and dependency calls make that I'll leave that be for now.
+#use "libs/strings"
 
-module hash
+private group module_qff
 
-	static var _md5
-	
-	static string md5(string str2hash)
-		hash._md5 = hash._md5 or NIL.Use("md5.lua")
-		return _md5.sum(str2hash)
+	string LoadString(string file)
+		var f
+		string content
+		f = assert(io.open(file, "rb"))
+		content = f:read("*all")
+		f:close()
+		return content
 	end
 	
-	void CONSTRUCTOR()
-		error("The 'hash' module is entirely static and should not be used with any NEW functions!")
+	table LoadLines(string file)
+		return brutesplit(LoadString(file),"\n")
+		// This routine is SLOW, I know, but faster routines would remove the whitelines which is a mortal sin to me.
+		// Also this ONLY works with Unix formatted files!!!
 	end
 
 end
+
+return module_qff
 
