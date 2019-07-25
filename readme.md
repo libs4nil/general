@@ -12,7 +12,7 @@ LinkedList = NIL.Use("LinkedList")
 
 And if you want to create a Linked List with this library now, hey it's easy then:
 ~~~Lua
-local MyList = LinkedList.NEW()
+local MyList = LinkedList()
 MyList.AddLast("Hello")
 MyList.AddLast("World")
 for s in MyList.Each do
