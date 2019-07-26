@@ -232,35 +232,36 @@ class CL_SASKIA
 				self.instr[#self.instr+1] = new CL_SASINS(cmd,para)
 			end
 		end
+	end
 		
-		void CONSTRUCTOR(string script)
-			self.Parse(script)
-			self.sessions = self.sessions or new TLinkedList
-		end
+	void CONSTRUCTOR(string script)
+		self.Parse(script)
+		self.sessions = self.sessions or new TLinkedList
+	end
 		
-		void Start(label)
-			var s
-			s = new CL_SESSION(self,label)
-			self.sessions.AddLast(s)
-		end
-		
-		static void Cycle()
-			for ses,lnk in self.sessions.Each
-				if (not ses.running) or ses.curline>#ses.script.instr
-					lnk.Unlink()
-				else
-					var ins
-					repeat
-						if ses.dontyield>0 then ses.dontyield = ses.dontyield - 1 end
-						ses.curline = ses.curline + 1
-						ins = ses.script.instr[ses.curline]
-						if ins
-							instruction[ins](ins.command,ins.para)
-						end
-					until ses.dontyield<=0
-				end
+	void Start(label)
+		var s
+		s = new CL_SESSION(self,label)
+		self.sessions.AddLast(s)
+	end
+	
+	static void Cycle()
+		for ses,lnk in self.sessions.Each
+			if (not ses.running) or ses.curline>#ses.script.instr
+				lnk.Unlink()
+			else
+				var ins
+				repeat
+					if ses.dontyield>0 then ses.dontyield = ses.dontyield - 1 end
+					ses.curline = ses.curline + 1
+					ins = ses.script.instr[ses.curline]
+					if ins
+						instruction[ins](ins.command,ins.para)
+					end
+				until ses.dontyield<=0
 			end
 		end
+	end
 end
 
 #pure
