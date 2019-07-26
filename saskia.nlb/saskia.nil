@@ -35,7 +35,6 @@
 // Please note it was not set up to be "turing-complete", as that should
 // be taken up by the underlying programs.
 
-
 // This line is set up for Bubble engines. When used in alternate engines
 // you may need to alter the foldername a little bit.
 #use "libs/strings"
@@ -44,21 +43,24 @@
 
 delegate compile
 var retval
-table instructions
+table instruction
 table instructionstrue
 table instructionsmeta
 
-compile = loadstring or load // Older versions of Lua use 'loadstring'. Newer versions use 'load'. I had to keep both possibilities in mind here!
+// Older versions of Lua use 'loadstring'. Newer versions use 'load'. I had to keep both possibilities in mind here!
+#pure
+compile = loadstring or load 
+#endpure
 
 instructionsmeta.__newindex = void()
 	error("The instruction table is READ ONLY!")
 end
 
-instructionsmeta.__index(t,k)
+instructionsmeta.__index = var(t,k)
 	return assert(instructionstrue[k],"Instruction "..k.." doesn't exist")
 end
 
-setmetatable(instructions,instructionsmeta)
+setmetatable(instruction,instructionsmeta)
 
 instructionstrue.CALL = void (session,params)
 	string f
@@ -68,21 +70,20 @@ instructionstrue.CALL = void (session,params)
 	d = "return "..f .. "("
 	for i,p in pairs(params) do
 		if i>1 then
-			if i>2 then d = d ..", "
+			if i>2 then d = d ..", " end
 			d = d .. p
 		end
 	end
 	d = d .. ")"
-	ls = compile(p)
+	ls = compile(d)
 	retval = ls()
 end
-
 
 instructionstrue.JMP = void (session,string label)
 	var script
 	script = session.script
 	assert(script.labels[label[1]],"Label '"..label[1].."' doesn't exist!")
-	seesion.curline = script.label[label[1]] - 1
+	session.curline = script.label[label[1]] - 1
 end
 
 instructionstrue.CHK = void (session,para)
@@ -93,27 +94,27 @@ instructionstrue.CHK = void (session,para)
 	end
 end
 
-instruction.MOV = void(session,para)
+instructionstrue.MOV = void(session,para)
 	delegate ls
 	ls = compile(para[2] .. " = "..para[1])
 end
 
-instruction["END"] = void(session)
+instructionstrue["END"] = void(session)
 	session.running=false
 end
 
-instruction.GROUP = void(session,para)
+instructionstrue.GROUP = void(session,para)
 	session.dontyield = tonumber(para[1] or 2)
 end
 
-instruction["RETURN"] = void(session)
+instructionstrue["RETURN"] = void(session)
 	session.curline = session.insstack.Value
 	if not session.curline
 		session.running=false
 	end
 end
 
-instruction.GOSUB = void(session,params)
+instructionstrue.GOSUB = void(session,params)
 	session.insstack.Value = session.curline
 	instruction.JMP(session,params)
 end
@@ -121,7 +122,7 @@ end
 string DefaultLoadFunction(string filename)
 	var f
 	string content
-	f = assert(io.open(file, "rb"))
+	f = assert(io.open(filename, "rb"))
 	content = f:read("*all")
 	f:close()
 	return content
@@ -207,7 +208,7 @@ class CL_SASKIA
 				while not (p==#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
 					p = p + 1
 				end
-				cmd = trim(Left(lines[i],p):upper()
+				cmd = string.upper(trim(Left(lines[i],p))
 				while p<#lines[i]
 					switch Mid(lines[i],p,1)
 						case "\""
@@ -254,7 +255,7 @@ class CL_SASKIA
 						ses.curline = ses.curline + 1
 						ins = ses.script.instr[ses.curline]
 						if ins
-							instructions[ins](ins.command,ins.para)
+							instruction[ins](ins.command,ins.para)
 						end
 					until ses.dontyield<=0
 				end
