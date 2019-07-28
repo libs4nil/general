@@ -1,7 +1,7 @@
 // License Information:
 // hash.nlb/hash.nil
 // Hash
-// version: 19.07.25
+// version: 19.07.28
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -17,6 +17,7 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
+
 
 // For now only md5 support, I must study the full sha2 file before using it
 // But some issues and dependency calls make that I'll leave that be for now.
@@ -35,4 +36,5 @@ module hash
 	end
 
 end
+
 
