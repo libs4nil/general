@@ -55,7 +55,7 @@ global string mid(string s,o,l)
   return substr(st,of,(of+ln)-1)
 end 
 
-var Mid
+global var Mid
 Mid=mid
 
 
