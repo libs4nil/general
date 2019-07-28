@@ -37,6 +37,7 @@
 
 // This line is set up for Bubble engines. When used in alternate engines
 // you may need to alter the foldername a little bit.
+
 #use "libs/strings"
 #use "libs/stack"
 #use "libs/linkedlist"
@@ -162,8 +163,8 @@ class CL_SESSION
 		assert(type(startlabel)=="string","String expected for startlabel")
 		self.script=script
 		if startlabel!=""
-			assert(script.labels[startlabel]),"Label "..startlabel.." not found! Cannot start session!")
-			self.curline = script.labels[startlabel])
+			assert(script.labels[startlabel],"Label "..startlabel.." not found! Cannot start session!")
+			self.curline = script.labels[startlabel]
 		end
 		self.insstack = new Stack
 		self.script = script
@@ -208,7 +209,7 @@ class CL_SASKIA
 				while not (p==#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
 					p = p + 1
 				end
-				cmd = string.upper(trim(Left(lines[i],p))
+				cmd = string.upper(trim(Left(lines[i],p)))
 				while p<#lines[i]
 					switch Mid(lines[i],p,1)
 						case "\""
@@ -246,7 +247,7 @@ class CL_SASKIA
 	end
 	
 	static void Cycle()
-		for ses,lnk in self.sessions.Each
+		for ses,lnk in CL_SASKIA.sessions.Each
 			if (not ses.running) or ses.curline>#ses.script.instr
 				lnk.Unlink()
 			else
@@ -266,5 +267,5 @@ end
 
 #pure
 return CL_SASKIA
-#end
+#endpure
 
