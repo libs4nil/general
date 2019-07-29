@@ -79,20 +79,22 @@ end
 //   Exist = ImageLoaded,
 //   AssignLoad = LoadImage   
 //}
-private group Image
+//private 
+group Image
 	delegate Exists
 	get var Exist
-		return Exists
+		return self.Exists
 	end
 	set var Exist
-		Exists = value
+		self.Exists = value
 	end
 	delegate AssignLoad
 	delegate Loaded
 end
 
 
-private group scen
+//private 
+group scen
 
 	// Done to make multi-engine stuff possible.
 	link ImageExists = Image.Exists
