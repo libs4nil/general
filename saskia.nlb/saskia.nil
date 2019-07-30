@@ -172,11 +172,12 @@ class CL_SESSION
 	end
 end
 
-#pure
-local
-#endpure
+//#pure
+//local
+//#endpure
 
-class CL_SASKIA
+#macro CL_SASKIA SASKIA
+class SASKIA
 	table instr
 	table labels
 	static var sessions
@@ -195,6 +196,7 @@ class CL_SASKIA
 		table lines
 		lines = brutesplit(script,'\n')
 		for i=1,#lines
+			//CSay(NIL.LuaSerialize(i.."; lines",lines))
 			lines[i] = Trim(lines[i])
 			if Left(lines[i],1)==";"
 				// Nothing at all here!
@@ -207,22 +209,30 @@ class CL_SASKIA
 				int p=1
 				int haakjes = 0
 				bool reeks = false
-				while not (p==#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
+				int timeout = 10000
+				while not (p>=#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
 					p = p + 1
+					timeout--
+					assert(timeout>0,"TIMEOUT!") 
 				end
 				cmd = string.upper(trim(Left(lines[i],p)))
 				while p<#lines[i]
+					para[parap] = para[parap] or ""
 					switch Mid(lines[i],p,1)
 						case "\""
 							para[parap] = para[parap] .. "\""
 							reeks = not reeks
 						case "("
-							haakjes = haakjes + 1
-							para[parap] = para[parap] .. "("
+							if not reeks
+								haakjes = haakjes + 1
+								para[parap] = para[parap] .. "("
+							end
 						case ")"
-							assert(haakjes>0,"unexpected ) in SASKIA script line #"..i)
-							haakjes = haakjes - 1
-							para[parap] = para[parap] .. ")"
+							if not reeks
+								assert(haakjes>0,"unexpected ) in SASKIA script line #"..i)							
+								haakjes = haakjes - 1
+								para[parap] = para[parap] .. ")"
+							end
 						case ","
 							parap = parap + 1
 							para [parap]=""
@@ -234,6 +244,7 @@ class CL_SASKIA
 				self.instr[#self.instr+1] = new CL_SASINS(cmd,para)
 			end
 		end
+		Annoy("SASKIA SCRIPT PARSED!") // debug 
 	end
 		
 	void CONSTRUCTOR(string script)
@@ -266,8 +277,10 @@ class CL_SASKIA
 	end
 end
 
-#pure
-return CL_SASKIA
-#endpure
+
+
+//#pure
+//return CL_SASKIA
+//#endpure
 
 
