@@ -104,11 +104,12 @@ global var brutesplit(inputstr,sep)
 	for i=1,#inputstr do
 		if mid(inputstr,i,#sep)==sep then 
 			ti = ti + 1 
+			t[ti] = ""
 			skip=#sep-1
 		elseif skip>0 then
 			skip = skip - 1 
 		else
-			t[ti] = t[ti] or ""
+			t[ti] = t[ti] or "" //--safety! But should not be!
 			t[ti] = t[ti] .. mid(inputstr,i,1)
 		end
 	end
