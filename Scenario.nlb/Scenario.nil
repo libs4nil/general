@@ -158,7 +158,7 @@ group scen
 								table.insert(ret[DLine],WorkRec)                
 							elseif #L>1 then
 								ProcessBLine(WorkRec,Prefix,DLine)   
-								end
+							end
 						default
 							error("Unknown language section: "..section.." in line #"..LineNumber)   
 					end
@@ -176,19 +176,21 @@ group scen
 				//--print('picfile',picfile)
 				picref = string.upper(rec.PicDir).."."..string.upper(rec.PicSpc)
 				if (not Image.Loaded(picref)) and scen.JCR_Exists(picfile) then 
-				var ti
-				ti = Image.AssignLoad(picfile,picref) 
-				portret[picref]=true 
-				if CSay
-					CSay('Loaded '..picfile..' on '..picref.." (BoxText)") 
-				end
-				if not Image.Loaded(picref) then 
-				if CSay
-					CSay("= FAILED!") 
-				end
-				if not ti then 
+					var ti
+					ti = Image.AssignLoad(picfile,picref) 
+					portret[picref]=true 
 					if CSay
-						CSay("= NIL RETURNED") 
+						CSay('Loaded '..picfile..' on '..picref.." (BoxText)") 
+					end // if CSay
+					if not Image.Loaded(picref) then 
+						if CSay
+							CSay("= FAILED!") 
+						end
+					end
+					if not ti then 
+						if CSay
+							CSay("= NIL RETURNED") 
+						end
 					end
 				elseif Image.Exist(picref) then
 					portret[picref]=true
@@ -215,7 +217,6 @@ group scen
 	end
 	
 end
-
 
 return scen
 
