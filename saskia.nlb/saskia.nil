@@ -42,12 +42,23 @@
 #use "libs/strings"
 #use "libs/stack"
 #use "libs/linkedlist"
+#use "libs/datetime"
 
+#macro saskiatimeout true
+
+
+//delegate SASKIA_CHAT
 delegate compile
 var retval
 table instruction
 table instructionstrue
 table instructionsmeta
+
+void as_tmo()
+	if saskiatimeout
+		Now.AssertTimeOut()
+	end
+end
 
 // Older versions of Lua use 'loadstring'. Newer versions use 'load'. I had to keep both possibilities in mind here!
 #pure
@@ -58,7 +69,7 @@ instructionsmeta.__newindex = void()
 	error("The instruction table is READ ONLY!")
 end
 
-instructionsmeta.__index = var(t,k)
+instructionsmeta.__index = var(t,string k)
 	return assert(instructionstrue[k],"Instruction "..k.." doesn't exist")
 end
 
@@ -71,13 +82,14 @@ instructionstrue.CALL = void (session,params)
 	f = params[1]
 	d = "return "..f .. "("
 	for i,p in pairs(params) do
-		if i>1 then
+		if i>1 and p!="" then
 			if i>2 then d = d ..", " end
 			d = d .. p
 		end
 	end
 	d = d .. ")"
-	ls = compile(d)
+	//CWriteLine(d,180,255,0)
+	ls = assert(compile(d,"SASKIA CALL"))
 	retval = ls()
 end
 
@@ -163,11 +175,12 @@ class CL_SESSION
 		startlabel = startlabel or ""
 		assert(type(startlabel)=="string","String expected for startlabel")
 		self.script=script
-		if startlabel!=""
-			assert(script.labels[startlabel],"Label "..startlabel.." not found! Cannot start session!")
+		if startlabel 
+			//CSay(NIL.LuaSerialize("labels",script.labels))
+			assert(script.labels[startlabel],"Label '"..startlabel.."' not found! Cannot start session!\n"..debug.traceback())
 			self.curline = script.labels[startlabel]
 		end
-		self.insstack = new Stack
+		self.insstack = stack()
 		self.script = script
 	end
 end
@@ -195,13 +208,15 @@ class SASKIA
 		self.instr = {}
 		table lines
 		lines = brutesplit(script,'\n')
+		Now.StartTimeOut(10)
 		for i=1,#lines
+			as_tmo()
 			//CSay(NIL.LuaSerialize(i.."; lines",lines))
 			lines[i] = Trim(lines[i])
-			if Left(lines[i],1)==";"
+			if Left(lines[i],1)==";" or (Trim(lines[i])=="")
 				// Nothing at all here!
 			elseif Left(lines[i],1)==":"
-				self.labels[Right(lines[1],#lines[i]-1)] = #self.instr + 1
+				self.labels[Right(lines[i],#lines[i]-1)] = #self.instr + 1
 			else
 				string cmd
 				table para
@@ -211,13 +226,18 @@ class SASKIA
 				bool reeks = false
 				int timeout = 10000
 				while not (p>=#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
+					as_tmo()
 					p = p + 1
 					timeout--
 					assert(timeout>0,"TIMEOUT!") 
 				end
 				cmd = string.upper(trim(Left(lines[i],p)))
-				while p<#lines[i]
-					para[parap] = para[parap] or ""
+				p++
+				// ------ CSayF("From line %d comes instruction %s (%s) (whitespace is on %d)",i,lines[i],cmd,p)
+				while p<=#lines[i]
+					as_tmo()
+					para[parap] = trim(para[parap] or "")
+					//--CSayF("SASKIA DEBUG: %3d/%3d/%3d >> %s",i,p,parap,NIL.LuaSerialize('para',para))
 					switch Mid(lines[i],p,1)
 						case "\""
 							para[parap] = para[parap] .. "\""
@@ -225,26 +245,27 @@ class SASKIA
 						case "("
 							if not reeks
 								haakjes = haakjes + 1
-								para[parap] = para[parap] .. "("
 							end
+							para[parap] = para[parap] .. "("
 						case ")"
 							if not reeks
 								assert(haakjes>0,"unexpected ) in SASKIA script line #"..i)							
 								haakjes = haakjes - 1
-								para[parap] = para[parap] .. ")"
 							end
+							para[parap] = para[parap] .. ")"
 						case ","
 							parap = parap + 1
 							para [parap]=""
 						default
 							para[parap] = para[parap] .. Mid(lines[i],p,1)
 					end
+					p++
 				end
 				assert(haakjes == 0 and (not reeks),"Unexpected end of line #"..i.." in SASKIA script")
 				self.instr[#self.instr+1] = new CL_SASINS(cmd,para)
 			end
 		end
-		Annoy("SASKIA SCRIPT PARSED!") // debug 
+		//Annoy("SASKIA SCRIPT PARSED!") // debug 
 	end
 		
 	void CONSTRUCTOR(string script)
@@ -252,25 +273,34 @@ class SASKIA
 		self.sessions = self.sessions or new TLinkedList
 	end
 		
-	void Start(label)
+	void Start(string label)
 		var s
 		s = new CL_SESSION(self,label)
+		s.running = true;
 		self.sessions.AddLast(s)
+		//CSayF("Session begin at label \"%s\"; reference: %s; Open sessions: %d",label,tostring(s),self.sessions.Count)
 	end
 	
 	static void Cycle()
+		//CWriteLine("SASKIA START CYCLE",255,255,0)
+		//CSayF("Sessions %3d ",CL_SASKIA.sessions.Count)
 		for ses,lnk in CL_SASKIA.sessions.Each
+			//CSayF("Session: %s :Start",tostring(ses))
 			if (not ses.running) or ses.curline>#ses.script.instr
-				lnk.Unlink()
+				lnk.UnLink()
 			else
 				var ins
+				//CWriteLine("Group NoYield start!",180,0,255)
 				repeat
+					//-- CSayF("SASKIA SESSION: %3d - %3d > %s",ses.curline,ses.dontyield,ses.instr[ses.curline])
 					if ses.dontyield>0 then ses.dontyield = ses.dontyield - 1 end
-					ses.curline = ses.curline + 1
 					ins = ses.script.instr[ses.curline]
+					//CSayF("SASKIA INSTRUCTION #%d (noyield %d) >> %s\n",ses.curline,ses.dontyield,ins[".dump"])
+					//CSay(NIL.LuaSerialize(">> Parameters",ins.para))
 					if ins
-						instruction[ins](ins.command,ins.para)
+						instruction[ins.command](ses,ins.para)
 					end
+					ses.curline = ses.curline + 1
 				until ses.dontyield<=0
 			end
 		end
