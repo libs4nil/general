@@ -1,0 +1,48 @@
+
+// This module is used a lot and locals are faster than globals.
+#pure
+local os = os
+#endpure
+
+group Now
+
+	get int Year
+		return tonumber(os.date("%Y")) or 1975
+	end
+	
+	get int Month
+		return tonumber(os.date("%m")) or 6
+	end
+	
+	get int Day
+		return tonumber(os.date("%d")) or 19
+	end
+	
+	get int Hour
+		return tonumber(os.date("%H")) or 18
+	end
+	
+	get int Minute
+		return tonumber(os.date("%M")) or 30
+	end
+	
+	get int Second
+		return tonumber(os.date("%S")) or 0
+	end
+	
+	get int SecStamp
+		return os.time()
+	end
+	
+	int tmout
+	void StartTimeOut(int MaxTime)
+		self.tmout = self.SecStamp + MaxTime
+		assert(self.tmout>self.SecStamp,"Time-Out init error!")
+	end
+	
+	void AssertTimeOut()
+		if self.tmout==0 then return end
+		assert(self.SecStamp<self.tmout,"Time-Out!\n"..debug.traceback())
+	end
+	
+end
