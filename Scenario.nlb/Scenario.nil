@@ -38,6 +38,7 @@ class ScenRec
 	string Header
 	string PicDir
 	string PicSpc
+	string PicRef
 	string AltTxtFont
 	string SoundFile
 	table Lines
@@ -111,10 +112,12 @@ group scen
 	// Must be set before usage
 	delegate JCR_Lines
 	delegate JCR_Exists
+	delegate print
 	
 	string audioext
 	void CONSTRUCTOR()
 		self.audioext = "wav"
+		self.print = print
 	end
 
 	table LoadData(string file,loadas,merge)
@@ -122,12 +125,17 @@ group scen
 		assert(scen.JCR_Lines,"scenario.JCR_Lines has not been set!")
 		assert(scen.JCR_Exists,"scenario.JCR_Exists has not been set!")
 		string lang
-		lang = scen.lang
+		lang = trim(scen.lang)
+		file = trim(file)
+		loadas = trim(loadas or file)
 		int LineNumber
 		string Line
 
-		string crap 
-		crap = scen.JCR_Lines('Scenario/'..lang.."/"..file)
+		table crap 
+		//self.print('Loading: Scenario/'..lang.."/"..file)
+		//crap = scen.JCR_Lines('Scenario/'..lang.."/"..file)
+		crap = scen.JCR_Lines(file)
+		self.print('= '..#crap..' lines read!')
 		table ret
 		string section 
 		section = "[rem]"
@@ -165,6 +173,9 @@ group scen
 				end
 			end
 		end
+		
+		// dummy this all
+		if false
 		
 		// Load Images
 		//local k,i,tag,rec // Lua uses none of them, but I didn't know that when I wrote this code first... :P
@@ -210,6 +221,9 @@ group scen
 				end
 			end 
 		end     
+		
+		// -- end of dummied code
+		end 
 		// -- closure
 		btdata[loadas or file] = ret    
 		//-- print(serialize("btdata",btdata)) -- Debug Line, must be on rem in release
