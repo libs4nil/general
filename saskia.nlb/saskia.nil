@@ -110,7 +110,9 @@ end
 
 instructionstrue.MOV = void(session,para)
 	delegate ls
-	ls = compile(para[2] .. " = "..para[1])
+	CSayF("Moving value %s into variable %s",para[1],para[2]) // debug
+	ls = assert(compile(para[2] .. " = "..para[1]))
+	ls()
 end
 
 instructionstrue["END"] = void(session)
@@ -225,6 +227,7 @@ class SASKIA
 				int haakjes = 0
 				bool reeks = false
 				int timeout = 10000
+				//while not (p>=#lines[i] or (Mid(lines[i],p,1)==" " and (not reeks)) or (Mid(lines[i],p,1)=="\t" and (not reeks)))
 				while not (p>=#lines[i] or Mid(lines[i],p,1)==" " or Mid(lines[i],p,1)=="\t")
 					as_tmo()
 					p = p + 1
@@ -236,7 +239,7 @@ class SASKIA
 				// ------ CSayF("From line %d comes instruction %s (%s) (whitespace is on %d)",i,lines[i],cmd,p)
 				while p<=#lines[i]
 					as_tmo()
-					para[parap] = trim(para[parap] or "")
+					para[parap] = para[parap] or ""
 					//--CSayF("SASKIA DEBUG: %3d/%3d/%3d >> %s",i,p,parap,NIL.LuaSerialize('para',para))
 					switch Mid(lines[i],p,1)
 						case "\""
@@ -263,6 +266,9 @@ class SASKIA
 				end
 				assert(haakjes == 0 and (not reeks),"Unexpected end of line #"..i.." in SASKIA script")
 				self.instr[#self.instr+1] = new CL_SASINS(cmd,para)
+				for i=1,#para 
+					para[i]=trim(para[i])
+				end
 			end
 		end
 		//Annoy("SASKIA SCRIPT PARSED!") // debug 
