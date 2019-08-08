@@ -1,0 +1,92 @@
+#macro showbreakdown false
+
+string MakeRoman(int num)
+
+	if num==0 then return "O" end
+	
+	int thousand
+	int hundred
+	int ten
+	int one	
+	int rest 
+	string ret
+	
+	// Cut it up first
+	thousand = math.floor(num/1000)
+	rest = num % 1000
+	hundred = math.floor(rest/100)
+	rest = rest % 100
+	ten = math.floor(rest/10)
+	one = rest % 10
+	if showbreakdown
+		print("Debug:",thousand,hundred,ten,one)
+	end
+
+	
+	// When there are too many thousands, let's cut that up then
+	if thousand>5
+		ret = MakeRoman(thousand).." * M"
+	else
+		for i=1,thousand
+			ret = ret .. "M"
+		end
+	end
+	
+	switch hundred
+		case 1 2 3 
+				for i=1,hundred
+					ret = ret .. "C"
+				end
+		case 4
+			ret = ret .. "CD"
+		case 5
+			ret = ret .. "D"
+		case 6 7 8 
+				ret = ret .. "D"
+				for i=1,hundred-5
+					ret = ret .. "C"
+				end
+		case 9
+			ret = ret .. "CM"
+	end
+	
+	switch ten
+		case 1 2 3 
+				for i=1,ten
+					ret = ret .. "X"
+				end
+		case 4
+			ret = ret .. "XL"
+		case 5
+			ret = ret .. "L"
+		case 6 7 8 
+				ret = ret .. "L"
+				for i=1,ten-5
+					ret = ret .. "X"
+				end
+		case 9
+			ret = ret .. "XC"
+	end
+	
+	switch one
+		case 1 2 3 
+				for i=1,one
+					ret = ret .. "I"
+				end
+		case 4
+			ret = ret .. "IV"
+		case 5
+			ret = ret .. "V"
+		case 6 7 8
+				ret = ret .. "V"
+				for i=1,one-5
+					ret = ret .. "I"
+				end
+		case 9
+			ret = ret .. "IX"
+	end
+
+	return ret
+end
+
+return MakeRoman
