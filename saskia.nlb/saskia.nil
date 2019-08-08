@@ -89,6 +89,7 @@ instructionstrue.CALL = void (session,params)
 	end
 	d = d .. ")"
 	//CWriteLine(d,180,255,0)
+	//CSayF("SASKIA CALL> %s",d)
 	ls = assert(compile(d,"SASKIA CALL"))
 	retval = ls()
 end
