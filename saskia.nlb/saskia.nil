@@ -287,11 +287,14 @@ class SASKIA
 		self.sessions.AddLast(s)
 		//CSayF("Session begin at label \"%s\"; reference: %s; Open sessions: %d",label,tostring(s),self.sessions.Count)
 	end
-	
-	static void Cycle()
+		
+	static bool Cycle()
+		bool ret
+		ret = false
 		//CWriteLine("SASKIA START CYCLE",255,255,0)
 		//CSayF("Sessions %3d ",CL_SASKIA.sessions.Count)
 		for ses,lnk in CL_SASKIA.sessions.Each
+			ret = true
 			//CSayF("Session: %s :Start",tostring(ses))
 			if (not ses.running) or ses.curline>#ses.script.instr
 				lnk.UnLink()
@@ -311,6 +314,10 @@ class SASKIA
 				until ses.dontyield<=0
 			end
 		end
+		// Will return true, if an actual cycle took place, if none
+		// took place sense no sessions were still running, it will
+		// return false.
+		return ret
 	end
 end
 
