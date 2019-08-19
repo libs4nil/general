@@ -93,4 +93,16 @@ global function each(table t)
 	end
 end
 
+global table tablecopy(table original,recurse)
+	table ret
+	for k,v in pairs(original)
+		if recurse and type(v)=="table"
+			ret[k] = tablecopy(v,true)
+		else
+			ret[k] = v
+		end
+	end
+	return ret
+end
+
 
