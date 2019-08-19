@@ -90,6 +90,19 @@ class TLinkedList
         return ret
     end
     
+    void RemoveDupes()
+		for chk,lnk in $Each
+			var nlnk
+			nlnk=lnk.Next
+			while nlnk				
+				if chk==nlnk.MyObject
+					nlnk.UnLink()
+				end
+				nlnk = nlnk.Next // remember the unlinked link is no longer being linked to by other links, but the link itself still has its links
+			end
+		end
+    end
+    
 
     get int Count
         int i = 0
