@@ -1,7 +1,7 @@
 // License Information:
 // tables.nlb/tables.nil
 // tables for NIL
-// version: 19.07.16
+// version: 19.08.19
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -17,6 +17,7 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
+
 
 
 // Please note... "function" does not do in NIL as it does in Lua!!!
@@ -104,5 +105,6 @@ global table tablecopy(table original,recurse)
 	end
 	return ret
 end
+
 
 
