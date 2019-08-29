@@ -1,7 +1,7 @@
 // License Information:
 // LinkedList.nlb/LinkedList.nil
 // Linked List support for NIL
-// version: 19.08.19
+// version: 19.08.29
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -17,6 +17,7 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
+
 
 
 
@@ -48,6 +49,11 @@ class TLink
         if self.List.Last == self
            self.List.Last = self.Previous
         end
+        
+        // This is needed or Lua will get memory leaks. 
+        // The garbage collector of Lua is not that well working!
+        self.Previous=nil;
+        self.Next=nil;
      end
 
      void CONSTRUCTOR(parentlist,obj, P, N)
@@ -65,6 +71,20 @@ class TLinkedList
     var First
     var Last
     readonly string want="var"
+    
+    void Clear()
+		var o
+		var n
+		o = $First
+		while o
+			n = o.Next
+			o.Next=nil;
+			o.Prev=nil;
+			o = n
+		end		
+		$First = nil;
+		$Last = nil;
+	end
    
     private static void chat(string cht)
         if TLinkedList._debug
@@ -76,16 +96,23 @@ class TLinkedList
     get delegate Each
         var ret
         var current
+        var nextlink
         current=self.First
+        if current
+			nextlink = current.Next
+		end
         ret = var ()
             if current==nil then
               return nil 
             end
             var retobj 
-            var retlink
+            var retlink            
             retlink=current
             retobj = current.MyObject
-            current = current.Next
+            current = nextlink
+            if nextlink
+				nextlink = nextlink.Next
+			end
             return retobj,retlink
         end        
         return ret
@@ -112,6 +139,10 @@ class TLinkedList
         end
         return i
     end
+    
+    get int LEN
+		return $Count
+	end
 
     
 
@@ -192,9 +223,6 @@ class TLinkedList
         end
         return ret.MyObject
     end
-
-    
-
     void RemoveItem(item,times)       
        for o,l in self.Each
            if o==item
@@ -254,6 +282,7 @@ end
 #pure
 return TLinkedList
 #endpure
+
 
 
 
