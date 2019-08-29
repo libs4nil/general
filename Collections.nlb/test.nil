@@ -1,0 +1,59 @@
+// License Information:
+// ***********************************************************
+// Collections.nlb/test.nil
+// This particular file has been released in the public domain
+// and is therefore free of any restriction. You are allowed
+// to credit me as the original author, but this is not
+// required.
+// This file was setup/modified in:
+// 
+// If the law of your country does not support the concept
+// of a product being released in the public domain, while
+// the original author is still alive, or if his death was
+// not longer than 70 years ago, you can deem this file
+// "(c) Jeroen Broks - licensed under the CC0 License",
+// with basically comes down to the same lack of
+// restriction the public domain offers. (YAY!)
+// ***********************************************************
+// Version 19.08.29
+// End License Information
+
+#use "Collections"
+var a
+
+a = new MArray("string",9,4,8)
+
+for i3=0,a.Length(3)-1
+	for i2=0,a.Length(2)-1
+		for i1=0,a.Length(1)-1
+			a.SetValue(i1,i2,i3,"t"..i1..i2..i3.."\tOh yeah!")
+			print(i1,i2,i3,">>>",a.toindex(i1,i2,i3),a.GetValue(i1,i2,i3))			
+		end
+	end
+end
+
+
+for i,v in a.Serial
+	print(i[1],i[2],i[3],v)
+end
+
+
+
+var qa
+qa = QuickArray("int",11)
+for i=0,10
+	qa[i]=i^2
+end
+
+print("#qa",#qa,qa.Len)
+
+for i,v in qa.iPairs
+	print(i,v)
+end
+for i=0,10,2
+	print(i,qa[i])
+end
+for v in qa.Each
+	print(v)
+end
+

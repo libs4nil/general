@@ -1,0 +1,218 @@
+// License Information:
+// Collections.nlb/Collections.nil
+// Collections
+// version: 19.08.29
+// Copyright (C)  Jeroen P. Broks
+// This software is provided 'as-is', without any express or implied
+// warranty.  In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 1. The origin of this software must not be misrepresented; you must not
+// claim that you wrote the original software. If you use this software
+// in a product, an acknowledgment in the product documentation would be
+// appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+// misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+// End License Information
+
+delegate sprintf
+sprintf = string.format
+
+#accept unpack
+#pure
+unpack = unpack or function(t, i)
+	i = i or 1
+	if t[i] ~= nil then
+		return t[i], unpack(t, i + 1)
+	end
+end
+local unpack = unpack
+#endpure
+
+
+
+class MArray
+
+	readonly table mdim
+	readonly string atype
+	readonly table values
+	
+	get int dimensions
+		return #mdim
+	end
+	
+	int Length(int dim)
+		assert(dim>=1 and dim<=#self.mdim,"Invalid dimension!")
+		return #$mdim[dim]
+	end
+	
+	int toindex(infinity)
+		table dims
+		int ret = 0
+		dims = { infinity }
+		if type(dims[1])=='table'
+			dims=dims[1]
+		end
+		assert(#dims==#self.mdim,sprintf("Invalid number of dimensions! (got %d, expected %d)",#dims,#self.mdim))
+		ret = dims[1]
+		for dim,idx in ipairs(dims)
+			int mul = 1
+			assert(idx>=0 and idx<$mdim[dim],sprintf("Dimension %d out of range (%d)/(0-%d)",dim,idx,$mdim[dim]))
+			if dim>1
+				for d=2,dim
+					//assert($mdim[d-1],sprintf("???? %d ????",d-1))
+					//print(mul,'*',$mdim[d-1])
+					mul = mul * ($mdim[d-1])
+				end
+				ret = ret + (idx*mul)
+			end
+		end
+		return ret
+	end
+	
+	var GetValue(infinity)
+		int idx
+		var ret
+		idx = $toindex(infinity)
+		ret = $values[idx]
+		if ret
+			return ret
+		end
+		switch $atype:lower()
+			case "string"
+				return ""
+			case "number" "int" "float"
+				return 0
+			case "bool" "boolean"
+				return false
+			case "table"
+				table createquicktable
+				$values[idx] = createquicktable
+				return createquicktable 
+			default
+				return nil
+		end
+	end
+	
+	void SetValue(infinity)
+		var query
+		table dims
+		var value
+		int idx
+		query = {infinity}
+		value = query[#query]
+		for i=1,#query-1
+			dims[i]=query[i]
+		end
+		idx = $toindex(dims)
+		switch $atype:lower()
+			case "string"
+				$values[idx] = tostring(value)
+			case "int"
+				assert(type(value)=='number' and math.floor(value)==value,"Integer number expected for value in this array")
+				$values[idx] = value
+			case "number"
+				assert(type(value)=='number',"Value must be a number... got: "..type(value))
+				$values[idx] = value
+			case "bool" "boolean"
+				$values[idx] = value!=nil and value!=0 and value!="" and value!=false
+			case "table" "userdata" "function" "delegate"
+				string mytype
+				if $atype=="delegate"
+					mytype="function"
+				else
+					mytype=$atype
+				end
+				assert(type(value)==mytype or value==nil,"Expected "..$atype.." for value! got: "..type(value))
+				$values[idx] = value
+			case "var"
+				$values[idx] = value
+			default
+				assert(value==nil or (type(value)=="table" and value[".classname"] == $atype),"Expected "..$atype.." for value! got: "..type(value))
+				$values[idx] = value
+		end
+	end
+	
+	get var Serial
+		table dims
+		for i=1,#self.mdim
+			dims[i] = 0
+		end
+		dims[1]=0-1		
+		return var()
+			dims[1]++
+			for i,d in ipairs(dims)
+				if d>=$mdim[i]
+					if i>=#self.mdim
+						return nil;
+					end
+					dims[i+1]++
+					dims[i]=0
+				end
+			end
+			return dims,$values[$toindex(dims)]
+		end
+	end
+	
+	void CONSTRUCTOR(string aatype,infinity)
+		self.mdim = { infinity }
+		assert(#self.mdim>=1,"Need at least 1 dimension!") 
+		for d,m in ipairs(self.mdim)
+			assert(type(m)=='number' and math.floor(m)==m and m>=1,sprintf("Invalid dimension setting for dimention #%d (%s)",d,tostring(m)))
+		end
+		self.atype = aatype
+	end
+
+end
+
+global var QuickArray(string mytype,int maxrange)
+	table ret
+	var therealthing
+	therealthing = new MArray(mytype,maxrange)
+	setmetatable(ret,{
+		['__newindex'] = void(t,int idx,value)
+			therealthing.SetValue(idx,value)
+		end,
+		['__index'] = var(t,key)
+			switch type(key)
+				case 'number'
+					return therealthing.GetValue(key)
+				case 'string'
+					switch key:upper()
+						case "EACH"
+							int i
+							i=-1
+							return var()
+								i++
+								if i>=therealthing.Length(1)
+									return nil;
+								end
+								return therealthing.GetValue(i)
+							end
+						case "LEN"
+							return therealthing.Length(1)
+						case "IPAIRS"
+							int i
+							i=-1
+							return var()
+								i++
+								if i>=therealthing.Length(1)
+									return nil,nil;
+								end
+								return i,therealthing.GetValue(i)
+							end
+					end
+				default
+					assert("Illegal array readout!")
+			end
+		end,
+		['__len'] = int()
+			return therealthing.Length(1)
+		end
+	})
+	return ret
+end
+
