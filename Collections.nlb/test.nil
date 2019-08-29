@@ -18,6 +18,7 @@
 // Version 19.08.29
 // End License Information
 
+
 #use "Collections"
 var a
 
@@ -55,5 +56,26 @@ for i=0,10,2
 end
 for v in qa.Each
 	print(v)
+end
+
+
+var mp
+mp = Map("var","var")
+mp.dog="woof"
+mp[100] = "hundred"
+mp[1] = 20
+mp.cat = "meow"
+mp[ true ] = "waar"
+mp[ false ] = "onwaar"
+mp[mp]="Ikzelf"
+mp[print]="functie"
+print("Map Length: ",#mp,mp.__MAP_LEN)
+print("Normal pairs")
+for k,v in mp.__MAP_PAIRS
+	print("PAIRS",k,v)
+end
+print("Sorted Pairs")
+for k,v in mp.__MAP_SORTEDPAIRS
+	print("SORTED",k,v)
 end
 

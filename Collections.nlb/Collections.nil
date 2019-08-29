@@ -18,6 +18,7 @@
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
 
+
 delegate sprintf
 sprintf = string.format
 
@@ -212,6 +213,142 @@ global var QuickArray(string mytype,int maxrange)
 		['__len'] = int()
 			return therealthing.Length(1)
 		end
+	})
+	return ret
+end
+
+global var Map(string mtype, string mvalue)
+	table ret
+	table therealthing
+	string maptype
+	string mapvalue
+	maptype=mtype
+	mapvalue=mvalue
+	
+	int length()
+		int ret
+		for k,v in pairs(therealthing)
+			ret++
+		end
+		return ret
+	end
+	
+	var valid(string wanttype,s)
+		switch wanttype
+			case "string"
+				return tostring(s)
+			case "int"
+				assert(type(s)=="number" and math.floor(s)==s,"Integer number required!")
+				return s
+			case "number" "float"
+				assert(type(s)=="number","Integer number required! Got "..type(s))
+				return s
+			case "table" "function" "userdata"
+				assert(s==nil or type(s)==wanttype,"Expected type: "..s.."! Got "..type(s))
+				return s
+			case "delegate"
+				assert(s==nil or type(s)=='function',"Expected type: delegate! Got "..type(s))
+			case "bool" "boolean"
+				s = s!=nil and s!=false and s!="" and s!=0
+			case "var"
+				return s
+			default
+				if s!=nil then
+					assert(type(s)=='table' and s[".classname"]==wanttype,"Expected class: "..s.."! Got "..type(s))
+				end
+				return s
+		end
+	end
+	
+	setmetatable(ret,{
+		['__newindex'] = void(t,key,value)
+			if type(key)=="string" and key:sub(1,4)=="__MAP_"
+				error("Reserved key! Definition not possible!")
+			end
+			key = valid(maptype,key)
+			assert(key!=nil,"set: Can't handle nil for key")
+			therealthing[key]=valid(mapvalue,value)
+		end,
+		['__index'] = var(t,key)
+			//print(type(key),key:sub(1,6))
+			if type(key)=="string" and key:sub(1,6)=="__MAP_"
+				string kk
+				kk = key:sub(7):upper()
+				switch kk
+					case "LEN" "LENGTH" "COUNT" "CNT"
+						return length()
+					case "REMOVE" "KILL" "DEL" "DELETE"
+						return void(keydel)
+							keydel = valid(maptype,keydel)
+							assert(keydel!=nil,"kill: Nil not acceptable as key")
+							therealthing[keydel]=nil;
+						end
+					case "PAIRS"
+						table vk
+						int i
+						for k,v in pairs(therealthing)
+							vk[#vk+1] = k
+						end
+						return var()
+							i++
+							if i>#vk
+								return nil,nil;
+							end
+							return vk[i],therealthing[vk[i]]
+						end
+					case "SORTEDPAIRS"
+						table keys
+						table sorttable
+						table types
+						int i
+						for k,v in pairs(therealthing)
+							table work
+							sorttable[type(k)] = sorttable[type(k)] or {}
+							work = sorttable[type(k)]
+							work[#work+1] = k
+						end
+						if sorttable['number']
+							table.sort(sorttable['number'])
+						end
+						if sorttable['string']
+							table.sort(sorttable['string'])
+						end
+						for k,v in pairs(sorttable)
+							types[#types+1] = k
+						end
+						table.sort(types)
+						for i,t in ipairs(types)
+							for ik,kkey in ipairs(sorttable[t])
+								keys[#keys+1]=kkey
+							end
+						end
+						
+						return var()
+							i++
+							return keys[i],therealthing[keys[i]]
+						end
+					default
+						error("Unknown reserved key: "..key)
+				end
+			end
+			
+			key = valid(maptype,key)
+			assert(key!=nil,"get: Can't handle nil for key")
+			if therealthing[key]==nil then
+				switch maptype
+					case "string"
+						return ""
+					case "int" "number" "float"
+						return 0
+					case "table"
+						therealthing[key] = {}
+					case "bool" "boolean"
+						return false
+				end
+			end
+			return therealthing[key]
+		end,
+		["__len"] = length
 	})
 	return ret
 end
