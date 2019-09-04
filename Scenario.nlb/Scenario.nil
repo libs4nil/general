@@ -133,7 +133,7 @@ group scen
 		string Line
 
 		table crap 
-		//self.print('Loading: Scenario/'..lang.."/"..file)
+		self.print('Loading: Scenario/'..lang.."/"..file)
 		//crap = scen.JCR_Lines('Scenario/'..lang.."/"..file)
 		crap = scen.JCR_Lines(file)
 		self.print('= '..#crap..' lines read!')

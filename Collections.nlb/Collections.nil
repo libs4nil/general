@@ -217,7 +217,7 @@ global var QuickArray(string mytype,int maxrange)
 	return ret
 end
 
-global var Map(string mtype, string mvalue)
+global var NewMap(string mtype, string mvalue)
 	table ret
 	table therealthing
 	string maptype

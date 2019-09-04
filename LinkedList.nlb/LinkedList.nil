@@ -276,6 +276,11 @@ class TLinkedList
          self.want=want or "var"
     end
         
+    void DESTRUCTOR()
+		// All links must be unlinked or memory leaks can occur
+		// due to Lua's poor garbage collector (when it comes to cross-linked references).
+		self.Clear()
+	end
 
 end
 

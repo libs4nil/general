@@ -60,7 +60,7 @@ end
 
 
 var mp
-mp = Map("var","var")
+mp = NewMap("var","var")
 mp.dog="woof"
 mp[100] = "hundred"
 mp[1] = 20
@@ -79,3 +79,16 @@ for k,v in mp.__MAP_SORTEDPAIRS
 	print("SORTED",k,v)
 end
 
+
+print("str map")
+var strmap
+strmap = NewMap("string","string")
+strmap[1] = "one"
+strmap.word = "word"
+strmap[2] = "two"
+strmap[123] = 123
+strmap[print]="func"
+strmap.abc="Alphabet"
+for k,v in strmap.__MAP_SORTEDPAIRS
+	print(k,v,type(k),type(v))
+end
