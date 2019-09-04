@@ -1,0 +1,30 @@
+#pure
+local
+#endpure
+
+class m_xmath
+	
+	number rad2deg(number radians)
+		return radians * (180/math.pi)
+	end
+	
+	number deg2rad(number degrees)
+		return degrees * (math.pi/180)
+	end
+	
+	number sin(number degrees)
+		return math.sin(deg2rad(degrees))
+	end
+	
+	number cos(number degrees)
+		return math.cos(deg2rad(degrees))
+	end
+	
+	number tan(number degrees)
+		assert ( degrees % 180 != 90, string.format("Tangent of %d degrees, doesn't exist!",degrees) )
+		return math.tan(deg2rad(degrees))
+	end
+	
+end
+
+return new M_xmath
