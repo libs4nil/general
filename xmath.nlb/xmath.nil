@@ -1,8 +1,31 @@
+// License Information:
+// xmath.nlb/xmath.nil
+// xmath
+// version: 19.10.29
+// Copyright (C)  Jeroen P. Broks
+// This software is provided 'as-is', without any express or implied
+// warranty.  In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 1. The origin of this software must not be misrepresented; you must not
+// claim that you wrote the original software. If you use this software
+// in a product, an acknowledgment in the product documentation would be
+// appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+// misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+// End License Information
 #pure
 local
 #endpure
 
 class m_xmath
+	
+	link radsin = math.sin
+	link radcos = math.cos
+	link radtan = math.tan
 	
 	number rad2deg(number radians)
 		return radians * (180/math.pi)
@@ -13,18 +36,44 @@ class m_xmath
 	end
 	
 	number sin(number degrees)
-		return math.sin(deg2rad(degrees))
+		return math.sin($deg2rad(degrees))
 	end
 	
 	number cos(number degrees)
-		return math.cos(deg2rad(degrees))
+		return math.cos($deg2rad(degrees))
 	end
 	
 	number tan(number degrees)
 		assert ( degrees % 180 != 90, string.format("Tangent of %d degrees, doesn't exist!",degrees) )
-		return math.tan(deg2rad(degrees))
+		return math.tan($deg2rad(degrees))
+	end
+	
+	// contrary to a normal for-loop where 1 to 10 means that all numbers from 1 till 10 are counted
+	// this range will do a for-loop 1 until 10, and then it goes till 9. In some kinds of for-loops
+	// you may need this ;)
+	var range(number start, number einde, stap)
+		stap = tonumber(stap) or 1
+		int idx 
+		idx = start
+		return number()
+			int ret
+			if (stap<0 and idx<=einde) or (idx>=einde)
+				return nil
+			end
+			ret = idx
+			idx = idx + stap
+			return ret
+		end
+	end
+	
+	number Pythagoras(number x1,number y1, number x2, number y2)
+		number Rechthoekszijde1 = math.abs(x1-x2)
+		number Rechthoekszijde2 = math.abs(y1-y2)
+		number Hypotenusa = (Rechthoekszijde1*Rechthoekszijde1) + (Rechthoekszijde2*Rechthoekszijde2)
+		return math.sqrt(Hypotenusa)
 	end
 	
 end
 
-return new M_xmath
+return new m_xmath
+
