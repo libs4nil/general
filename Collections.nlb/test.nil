@@ -15,7 +15,7 @@
 // with basically comes down to the same lack of
 // restriction the public domain offers. (YAY!)
 // ***********************************************************
-// Version 19.08.29
+// Version 19.10.29
 // End License Information
 
 
@@ -92,3 +92,4 @@ strmap.abc="Alphabet"
 for k,v in strmap.__MAP_SORTEDPAIRS
 	print(k,v,type(k),type(v))
 end
+
