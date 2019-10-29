@@ -1,7 +1,7 @@
 // License Information:
 // tables.nlb/tables.nil
 // tables for NIL
-// version: 19.08.19
+// version: 19.10.29
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -106,5 +106,23 @@ global table tablecopy(table original,recurse)
 	return ret
 end
 
+global void tableclear(table vuil,recurse,sf)
+	table kill
+	// "sf" is only needed to prevent stack overflow errors in recursive
+	// actions, as that can (and will) happen in cyclic references in 
+	// tables. Please note, if classes or metatables are used
+	// this function will not function properly.
+	sf = sf or {}
+	for k,v in pairs(vuil)
+		if type(v)=="table" and recurse and (not sf[v])
+			sf[v]=true;
+			tableclear(sf[v],true,sf)
+		end
+		kill[#kill+1]=k
+	end
+	for k in each(kill)
+		vuil[k]=nil;
+	end
+end
 
 
