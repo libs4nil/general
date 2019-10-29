@@ -1,7 +1,7 @@
 // License Information:
 // LinkedList.nlb/LinkedList.nil
 // Linked List support for NIL
-// version: 19.08.29
+// version: 19.10.29
 // Copyright (C)  Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -17,10 +17,6 @@
 // misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
-
-
-
-
 
 // This is just an experimental Linked List library.
 
@@ -79,7 +75,7 @@ class TLinkedList
 		while o
 			n = o.Next
 			o.Next=nil;
-			o.Prev=nil;
+			o.Previous=nil;
 			o = n
 		end		
 		$First = nil;
@@ -287,6 +283,7 @@ end
 #pure
 return TLinkedList
 #endpure
+
 
 
 
