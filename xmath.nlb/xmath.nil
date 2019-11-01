@@ -66,10 +66,17 @@ class m_xmath
 		end
 	end
 	
+	int round(int r)
+		return math.floor(r+0.5)
+	end
+	
 	number Pythagoras(number x1,number y1, number x2, number y2)
-		number Rechthoekszijde1 = math.abs(x1-x2)
-		number Rechthoekszijde2 = math.abs(y1-y2)
-		number Hypotenusa = (Rechthoekszijde1*Rechthoekszijde1) + (Rechthoekszijde2*Rechthoekszijde2)
+		number Rechthoekszijde1
+		number Rechthoekszijde2
+		number Hypotenusa
+		Rechthoekszijde1 = math.abs(x1-x2)
+		Rechthoekszijde2 = math.abs(y1-y2)
+		Hypotenusa = (Rechthoekszijde1*Rechthoekszijde1) + (Rechthoekszijde2*Rechthoekszijde2)
 		return math.sqrt(Hypotenusa)
 	end
 	
