@@ -21,10 +21,10 @@
 
 
 // SASKIA = Serial Adventure Scripting Keeping Interface Advancements
-//
+// 
 // SASKIA is a pretty simple scripter set up in NIL, meant to avoid 
 // the woes of engines where callbacks are standard or even mandadory.
-//
+// 
 // Now SASKIA has been written in NIL, but it should be easy to 
 // translate the code to other scripting languages such as Lua (Duh, 
 // since that is what NIL already does), squirrel and JavaScript (the
@@ -95,18 +95,20 @@ instructionstrue.CALL = void (session,params)
 	retval = ls()
 end
 
-instructionstrue.JMP = void (session,string label)
+instructionstrue.JMP = void (session,label)
 	var script
 	script = session.script
-	assert(script.labels[label[1]],"Label '"..label[1].."' doesn't exist!")
-	session.curline = script.label[label[1]] - 1
+	assert(script.labels[label[1]],"SASKIA: Label '"..tostring(label[1]).."' doesn't exist!")
+	session.curline = script.labels[label[1]] - 1
 end
+instructionstrue.JUMP = instructionstrue.JMP
 
 instructionstrue.CHK = void (session,para)
 	delegate ls
+	assert(#para>=2,"SASKIA: CHK requires at least two arguments!")
 	ls = compile("return "..para[1])
 	if ls() 
-		instructionstrue.JMP(session,para[2])
+		instructionstrue.JMP(session,{para[2]})
 	end
 end
 
@@ -114,6 +116,18 @@ instructionstrue.MOV = void(session,para)
 	delegate ls
 	CSayF("Moving value %s into variable %s",para[1],para[2]) // debug
 	ls = assert(compile(para[2] .. " = "..para[1]))
+	ls()
+end
+
+instructionstrue.DEC = void(session,para)
+	delegate ls
+	ls = assert(compile(para[1].." = "..para[1].." - "..(para[2] or "1")))
+	ls()
+end
+
+instructionstrue.INC = void(session,para)
+	delegate ls
+	ls = assert(compile(para[1].." = "..para[1].." + "..(para[2] or "1")))
 	ls()
 end
 
@@ -173,8 +187,6 @@ class CL_SESSION
 	var insstack
 	var script
 	
-	
-	
 	void CONSTRUCTOR(script,startlabel)
 		startlabel = startlabel or ""
 		assert(type(startlabel)=="string","String expected for startlabel")
@@ -184,7 +196,7 @@ class CL_SESSION
 			assert(script.labels[startlabel],"Label '"..startlabel.."' not found! Cannot start session!\n"..debug.traceback())
 			self.curline = script.labels[startlabel]
 		end
-		self.insstack = stack()
+		self.insstack = new TStack
 		self.script = script
 	end
 end
@@ -320,6 +332,15 @@ class SASKIA
 		// return false.
 		return ret
 	end
+	
+	static void Wipe()
+		for ses,lnk in CL_SASKIA.sessions.Each
+			ses.running=false
+			// Should not really matter, but to make sure!
+		end
+		SASKIA.sessions.Clear()
+	end
+	
 end
 
 
