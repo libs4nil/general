@@ -231,6 +231,11 @@ group scen
 		return ret
 	end
 	
+	table LoadNewData(string file,loadas)
+		btdata[loadas or file] = btdata[loadas or file] or self.LoadData(file,loadas)
+		return btdata[loadas or file]
+	end
+	
 end
 
 return scen
