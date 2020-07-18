@@ -125,4 +125,12 @@ global void tableclear(table vuil,recurse,sf)
 	end
 end
 
+global bool arraycontains(table tabel,element)
+	bool ret
+	for item in each(tabel)
+		ret = ret or (item==element)
+	end
+	return ret
+end
+
 
