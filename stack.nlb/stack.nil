@@ -19,11 +19,9 @@
 // End License Information
 
 
-#pure
-local
-#endpure
 
-class Stack
+class TStack
+	
 	private table values
 	private string wantedtype
 	
@@ -47,15 +45,15 @@ class Stack
 	
 	get var Value
 		var ret
-		if #values<=0 then return nil end
-		ret = self.values[#values]
-		self.values[#values]=nil // popping = removing too!
+		if #self.values<=0 then return nil end
+		ret = self.values[#self.values]
+		self.values[#self.values]=nil // popping = removing too!
 		return ret
 	end
 	
 	set var Value
 		assert(value and (self.wantedtype=="var" or type(value)==self.wantedtype),"Stack wants "..self.wantedtype.."; got "..type(value))
-		self.values[#values+1] = value
+		self.values[#self.values+1] = value
 	end
 	
 	void Push(v)
@@ -81,10 +79,8 @@ class Stack
 			return self.values[i]
 		end
 	end
+	
 end
 
-#pure
-return Stack
-#endpure
 
 
