@@ -18,6 +18,7 @@
 // 3. This notice may not be removed or altered from any source distribution.
 // End License Information
 
+
 delegate c_sprintf
 c_sprintf = string.format
 
@@ -32,6 +33,12 @@ end
 local unpack = unpack
 #endpure
 
+
+void col_assert(cond,string err)
+	if not cond
+		error(err.."\n\n"..debug.traceback())
+	end
+end
 
 
 class MArray
@@ -60,7 +67,7 @@ class MArray
 		ret = dims[1]
 		for dim,idx in ipairs(dims)
 			int mul = 1
-			assert(idx>=0 and idx<$mdim[dim],c_sprintf("Dimension %d out of range (%d)/(0-%d)",dim,idx,$mdim[dim]))
+			col_assert(idx>=0 and idx<$mdim[dim],c_sprintf("Dimension %d out of range (%d)/(0-%d)",dim,idx,$mdim[dim]))
 			if dim>1
 				for d=2,dim
 					//assert($mdim[d-1],c_sprintf("???? %d ????",d-1))
@@ -161,7 +168,7 @@ class MArray
 		self.mdim = { infinity }
 		assert(#self.mdim>=1,"Need at least 1 dimension!") 
 		for d,m in ipairs(self.mdim)
-			assert(type(m)=='number' and math.floor(m)==m and m>=1,c_sprintf("Invalid dimension setting for dimention #%d (%s)",d,tostring(m)))
+			assert(type(m)=='number' and math.floor(m)==m and m>=1,c_sprintf("Invalid dimension setting for dimension #%d (%s)",d,tostring(m)))
 		end
 		self.atype = aatype
 	end
